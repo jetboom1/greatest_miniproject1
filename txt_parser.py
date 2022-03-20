@@ -1,5 +1,6 @@
-
 from pprint import pprint
+from geopy import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
 
 
 def read_file(path):
@@ -8,15 +9,32 @@ def read_file(path):
         return file_as_string
 
 
+def header(protosfiterat, dekanat, settlement):
+    geolocator = Nominatim(user_agent="University")
+    geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+    founded_result = geolocator.geocode(settlement)
+    result = {
+        "протопресвітерат": protosfiterat,
+        "деканат": dekanat,
+        "населений пункт": {
+            "назва": settlement,
+            "location": {
+                "lat": round(founded_result.latitude, 5),
+                "lng": round(founded_result.longitude, 5)
+            }
+        }
+    }
+    return result
+
+
 def parse_(file_):
     file = file_.split(') ')
     head = file.pop(0).split('\n\n')
-    # парсинг окремих даних по ключах
     # тобто це словник де місто це ключ а вся інформація це значення
     lines = []
     # додавання шапки
     lines.append(head[:-1])
-    # по кажному населеномц пункті
+    # по кажному населеному пункті
     for line in file:
         settlement = dict()
         # тепер проходимось кожному абзаці
@@ -28,10 +46,13 @@ def parse_(file_):
                     value = part_of_line.split(', ')[1:]
                     time_dict_1 = {}
                     # на випадок якщо більше ніж одна церква в селі
+                    iterator = 1
                     for church in ', '.join(value).replace('\n', ' ').split('; '):
                         church = church.split(', ')
-                        time_dict_1[church[0]] = church[1:]
-                    settlement[key] = [time_dict_1]
+                        time_dict_1[f'церква_{iterator}'] = church
+                        iterator += 1
+                    settlement[key] = [header(head[1].split()[0], head[0].split()[0], key)]
+                    settlement[key].append(time_dict_1)
                 # якщо стрічка не мітить церкви
                 else:
                     line_ = part_of_line.split(": ")
@@ -53,4 +74,5 @@ def parse_(file_):
                         settlement[key].append(time_dict)
         # додаємо населений пункт в список
         lines.append(settlement)
+    lines.pop(0)
     return lines
