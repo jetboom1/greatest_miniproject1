@@ -12,18 +12,31 @@ def read_file(path):
 def header(protosfiterat, dekanat, settlement):
     geolocator = Nominatim(user_agent="University")
     geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
-    founded_result = geolocator.geocode(settlement)
-    result = {
-        "протопресвітерат": protosfiterat,
-        "деканат": dekanat,
-        "населений пункт": {
-            "назва": settlement,
-            "location": {
-                "lat": round(founded_result.latitude, 5),
-                "lng": round(founded_result.longitude, 5)
+    try:
+        founded_result = geolocator.geocode(settlement)
+        result = {
+            "протопресвітерат": protosfiterat,
+            "деканат": dekanat,
+            "населений пункт": {
+                "назва": settlement,
+                "location": {
+                    "lat": founded_result.latitude,
+                    "lng": founded_result.longitude
+                }
             }
         }
-    }
+    except AttributeError:
+        result = {
+            "протопресвітерат": protosfiterat,
+            "деканат": dekanat,
+            "населений пункт": {
+                "назва": settlement,
+                "location": {
+                    "lat": 'not found',
+                    "lng": 'not found'
+                }
+            }
+        }
     return result
 
 
@@ -55,7 +68,7 @@ def parse_(file_):
                     settlement[key].append(time_dict_1)
                 # якщо стрічка не мітить церкви
                 else:
-                    line_ = part_of_line.split(": ")
+                    line_ = part_of_line.split(":")
                     time_dict = {}
                     key_ = line_[0]
                     # якщо ключ строчки є школа
@@ -67,12 +80,39 @@ def parse_(file_):
                             time_list.append(school)
                         time_dict[key_] = time_list
                         settlement[key].append(time_dict)
+                    elif key_ == 'Надає':
+                        time_dict[key_] = line_[1].replace('\n', ' ')
+                        settlement[key].append(time_dict)
+                    # elif key_ == 'Душ' and key == 'ХОДОРІВ; М-ко':
+                    #     value = line_[1].replace('\n', ' ')
+                    #     other = value.split
                     #  всі решту стрічки
                     else:
+                        complex_dict = {}
                         value = line_[1].replace('\n', ' ')
-                        time_dict[key_] = value
+                        items = value.split(',')
+                        flag = True
+                        for item in items:
+                            if key_ == 'Парох' and flag:# and item.split('.')[0] == 'о':
+                                complex_dict["ім'я"] = item
+                                flag = False
+                            elif key_ == 'Стар.' and flag:
+                                complex_dict['Стар.'] = item.split(' ')[0]
+                                complex_dict['відстань'] = ' '.join(item.split(' ')[1:])
+                                flag = False
+                            else:
+                                try:
+                                    complex_dict[item.split('.')[0]] = item.split('.')[1]
+                                except IndexError:
+                                    complex_dict['0'] = item
+                        time_dict[key_] = complex_dict
                         settlement[key].append(time_dict)
         # додаємо населений пункт в список
         lines.append(settlement)
     lines.pop(0)
     return lines
+
+if __name__ == '__main__':
+    file_string = read_file('text/hodoriv.txt')
+    parsed = parse_(file_string)
+    pass
