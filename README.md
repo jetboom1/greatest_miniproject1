@@ -4,7 +4,7 @@
 <b><i>Pianists</i></b>
 </p> </h2>
 <p align="center">
-  <img height="150" src="https://images.freeimages.com/images/premium/small-comps/3339/33399262-piano-keys.jpg">
+  <img height="200" src="https://www.meme-arsenal.com/memes/049af42ac1f0e3186d1b6427d31e290f.jpg">
 </p>
 <br>
 <h1> <p align="center">
