@@ -13,7 +13,7 @@
 <h2> <p style="color:#1589F0">General info:</p>
 </h2>
 <h3>
-The goal of the project is to create the web application with information about three dikanats. Our work consists of <b><i>4 stages</i></b>: </h3> <br>
+The goal of the project is to create the web application with information about three deans. Our work consists of <b><i>4 stages</i></b>: </h3> <br>
 <h2>
 <b> 1. Prepare and save web application data</b>
 </h2>
