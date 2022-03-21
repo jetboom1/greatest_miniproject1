@@ -1,6 +1,7 @@
 from pprint import pprint
 from geopy import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
+import re
 
 
 def read_file(path):
@@ -83,9 +84,31 @@ def parse_(file_):
                     elif key_ == 'Надає':
                         time_dict[key_] = line_[1].replace('\n', ' ')
                         settlement[key].append(time_dict)
-                    # elif key_ == 'Душ' and key == 'ХОДОРІВ; М-ко':
-                    #     value = line_[1].replace('\n', ' ')
-                    #     other = value.split
+                    elif key_ == 'Душ':
+                        values = line_[1].replace('\n', ' ').split(';')
+                        other = ''
+                        time_dict[key_] = []
+                        general_dict = {}
+                        other_dict = None
+                        pril_dict = None
+                        if len(values) > 1:
+                            other = values[-1]
+                            other_dict = {'інше': other}
+                            values.pop(-1)
+                        for elements in values:
+                            if not elements.strip().startswith('в прил.'):
+                                for element in elements.split(', '):
+                                    general_dict[element.split('.')[0]] = element.split('.')[1].strip()
+                            else:
+                                pril_info = elements.strip()[8:]
+                                end_of_name = re.search('\s[а-яі]{3}[.]{1}', pril_info).span()[0]
+                                pril_name = pril_info[:end_of_name]
+                                pril_dict = {'пріл': pril_name}
+                                for element in pril_info[end_of_name+1:].split(', '):
+                                    pril_dict[element.split('.')[0]] = element.split('.')[1].strip()
+                        time_dict[key_].append(list(filter(lambda a: a, [general_dict, pril_dict, other_dict])))
+                        settlement[key].append(time_dict)
+                        pass
                     #  всі решту стрічки
                     else:
                         complex_dict = {}
