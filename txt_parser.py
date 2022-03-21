@@ -109,6 +109,33 @@ def parse_(file_):
                         time_dict[key_].append(list(filter(lambda a: a, [general_dict, pril_dict, other_dict])))
                         settlement[key].append(time_dict)
                         pass
+                    elif key_ == 'Дот.' or key_ == 'Дот. т.':
+                        value = line_[1].replace('\n', ' ').split('; ')
+                        other_dict = None
+                        time_dict[key_] = []
+                        if len(value) > 1:
+                            other = value[-1]
+                            other_dict = {'інше': other}
+                            value.pop(-1)
+                        values = value[0].split(', ')
+                        for element in values:
+                            el_dict = {}
+                            try:
+                                key_end = re.search('[псінгорадеужл]{1,4}[.]{1}', element).span()[1]
+                                dot_key = re.search('[псінгорадлеуж]{1,4}[.]{1}', element).group()
+                            except AttributeError:
+                                key_end = 0
+                                dot_key = 'п. '
+                            element = element[key_end:]
+                            patterns = re.findall('[0-9]{1,2}\s[haаm2]{1,2}', element)
+                            num_dict = {}
+                            for pattern in patterns:
+                                num_dict[pattern.split(' ')[1]] = pattern.split(' ')[0]
+                            el_dict[dot_key] = num_dict
+                            time_dict[key_].append(el_dict)
+                        if other_dict:
+                            time_dict[key_].append(other_dict)
+                        settlement[key].append(time_dict)
                     #  всі решту стрічки
                     else:
                         complex_dict = {}
