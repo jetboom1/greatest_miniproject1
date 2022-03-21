@@ -33,17 +33,17 @@ Here we processed the data from <i>jpeg</i> into <i>json</i> files using tessera
 <h2>
 <b> 2. Design and implementation of the basic API web application</b>
 </h2>
-<h3> <p style="color:#f03c15">In progress</p>
+<h3> <p style="color:#f03c15">In progress...</p>
 </h3>
 <br>
 <h2>
 <b> 3. Design and implementation of a web application</b>
 </h2>
-<h3> <p style="color:#f03c15">In progress</p>
+<h3> <p style="color:#f03c15">In progress...</p>
 </h3>
 <br>
 <h2>
 <b> 4. Software deployment</b>
 </h3>
-<h3> <p style="color:#f03c15">In progress</p>
+<h3> <p style="color:#f03c15">In progress...</p>
 </h3>
