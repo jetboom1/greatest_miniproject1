@@ -4,7 +4,7 @@
 <b><i>Pianists</i></b>
 </p> </h2>
 <p align="center">
-  <img height="200" src="https://www.meme-arsenal.com/memes/049af42ac1f0e3186d1b6427d31e290f.jpg">
+  <img height="300" src="https://www.meme-arsenal.com/memes/049af42ac1f0e3186d1b6427d31e290f.jpg">
 </p>
 <br>
 <h1> <p align="center">
