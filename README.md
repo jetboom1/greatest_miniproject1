@@ -19,6 +19,9 @@ The goal of the project is to create the web application with information about 
 </h2>
 <h3>
 Here we processed the data from <i>jpeg</i> into <i>json</i> files using tesseract. The original files and the results of the processing are in folder <b> data</b></h3>
+
+[1.txt](1.txt)
+
 <h3> <p style="color:#c5f015">Done</p>
 </h3>
 <br>
