@@ -2,6 +2,7 @@ from pprint import pprint
 from geopy import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 import re
+import json
 
 
 def read_file(path):
@@ -98,7 +99,10 @@ def parse_(file_):
                         for elements in values:
                             if not elements.strip().startswith('в прил.'):
                                 for element in elements.split(', '):
-                                    general_dict[element.split('.')[0]] = element.split('.')[1].strip()
+                                    try:
+                                        general_dict[element.split('.')[0]] = element.split('.')[1].strip()
+                                    except IndexError:
+                                        continue
                             else:
                                 pril_info = elements.strip()[8:]
                                 end_of_name = re.search('\s[а-яі]{3}[.]{1}', pril_info).span()[0]
@@ -139,7 +143,10 @@ def parse_(file_):
                     #  всі решту стрічки
                     else:
                         complex_dict = {}
-                        value = line_[1].replace('\n', ' ')
+                        try:
+                            value = line_[1].replace('\n', ' ')
+                        except IndexError:
+                            continue
                         items = value.split(',')
                         flag = True
                         for item in items:
@@ -162,7 +169,14 @@ def parse_(file_):
     lines.pop(0)
     return lines
 
+
 if __name__ == '__main__':
-    file_string = read_file('text/hodoriv.txt')
+    file_string = read_file('text/stymilo-kamenets.txt')
     parsed = parse_(file_string)
-    pass
+    ans = []
+    for i in parsed:
+        for j in i.values():
+            for k in j:
+                ans.append(k)
+    with open("jsons/strymilo-kamenets.json", "w", encoding="utf-8") as file:
+        json.dump(ans, file, indent=4, ensure_ascii=False)
