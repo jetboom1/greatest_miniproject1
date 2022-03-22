@@ -176,7 +176,6 @@ if __name__ == '__main__':
     ans = []
     for i in parsed:
         for j in i.values():
-            for k in j:
-                ans.append(k)
+            ans.append(j)
     with open("jsons/strymilo-kamenets.json", "w", encoding="utf-8") as file:
         json.dump(ans, file, indent=4, ensure_ascii=False)
