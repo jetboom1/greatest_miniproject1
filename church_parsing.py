@@ -62,5 +62,7 @@ def church_parser(path):
     text = read_file(path)
     rows = text.split('\n\n')
     churhes = church_parser(rows)
-    with open("jsons/strymilo-kamenets_churhes.json", "w", encoding="utf-8") as file:
-        json.dump(churhes, file, indent=4, ensure_ascii=False)
+    # with open("jsons/strymilo-kamenets_churhes.json", "w", encoding="utf-8") as file:
+    #     json.dump(churhes, file, indent=4, ensure_ascii=False)
+
+    return churhes
