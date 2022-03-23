@@ -1,6 +1,8 @@
 from pprint import pprint
 from geopy import Nominatim
+from geopy.exc import GeocoderUnavailable
 from geopy.extra.rate_limiter import RateLimiter
+from church_parser import church_parser
 import re
 import json
 
@@ -27,7 +29,7 @@ def header(protosfiterat, dekanat, settlement):
                 }
             }
         }
-    except AttributeError:
+    except (AttributeError, GeocoderUnavailable):
         result = {
             "протопресвітерат": protosfiterat,
             "деканат": dekanat,
@@ -59,15 +61,9 @@ def parse_(file_):
                 if line.split('\n\n')[0] == part_of_line:
                     key = part_of_line.split(', ')[0]
                     value = part_of_line.split(', ')[1:]
-                    time_dict_1 = {}
-                    # на випадок якщо більше ніж одна церква в селі
-                    iterator = 1
-                    for church in ', '.join(value).replace('\n', ' ').split('; '):
-                        church = church.split(', ')
-                        time_dict_1[f'церква_{iterator}'] = church
-                        iterator += 1
+                    churches = church_parser(', '.join(value).replace('\n', ' ').split('; '))
                     settlement[key] = [header(head[1].split()[0], head[0].split()[0], key)]
-                    settlement[key].append(time_dict_1)
+                    settlement[key].append(churches)
                 # якщо стрічка не мітить церкви
                 else:
                     line_ = part_of_line.split(":")
@@ -167,15 +163,19 @@ def parse_(file_):
         # додаємо населений пункт в список
         lines.append(settlement)
     lines.pop(0)
+    # pprint(lines)
     return lines
 
 
 if __name__ == '__main__':
-    file_string = read_file('text/stymilo-kamenets.txt')
-    parsed = parse_(file_string)
-    ans = []
-    for i in parsed:
-        for j in i.values():
-            ans.append(j)
-    with open("jsons/strymilo-kamenets.json", "w", encoding="utf-8") as file:
-        json.dump(ans, file, indent=4, ensure_ascii=False)
+    data = parse_(read_file('hodoriv.txt'))
+    new_main_dct = {}
+    for main_dct in data:
+        main_key = list(main_dct.keys())[0]
+        inner = {}
+        for dct in main_dct[main_key]:
+            for key in dct:
+                inner[key] = dct[key]
+        new_main_dct[main_key] = inner
+    with open("hodoriv.json", "w", encoding="utf-8") as file:
+        json.dump(new_main_dct, file, indent=4, ensure_ascii=False)
