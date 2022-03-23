@@ -2,7 +2,7 @@ from pprint import pprint
 from geopy import Nominatim
 from geopy.exc import GeocoderUnavailable
 from geopy.extra.rate_limiter import RateLimiter
-from church_parser import church_parser
+from church_parsing import church_parser
 import re
 import json
 
@@ -168,7 +168,7 @@ def parse_(file_):
 
 
 if __name__ == '__main__':
-    data = parse_(read_file('hodoriv.txt'))
+    data = parse_(read_file('text/hodoriv.txt'))
     new_main_dct = {}
     for main_dct in data:
         main_key = list(main_dct.keys())[0]
@@ -177,5 +177,5 @@ if __name__ == '__main__':
             for key in dct:
                 inner[key] = dct[key]
         new_main_dct[main_key] = inner
-    with open("hodoriv.json", "w", encoding="utf-8") as file:
+    with open("jsons/hodoriv.json", "w", encoding="utf-8") as file:
         json.dump(new_main_dct, file, indent=4, ensure_ascii=False)
