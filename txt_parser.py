@@ -84,35 +84,39 @@ def parse_(file_):
                     elif key_ == 'Душ':
                         values = line_[1].replace('\n', ' ').split(';')
                         other = ''
-                        time_dict[key_] = []
                         general_dict = {}
-                        other_dict = None
-                        pril_dict = None
-                        if len(values) > 1:
-                            other = values[-1]
-                            other_dict = {'інше': other}
-                            values.pop(-1)
+                        other_dict = {}
+                        is_general_parsed = False
+                        pril_dict = {}
                         for elements in values:
-                            if not elements.strip().startswith('в прил.'):
+                            if elements.strip().startswith('в прил.'):
+                                pril_info = elements.strip()[8:]
+                                end_of_name = re.search('\s[а-яі]{3}[.]{1}', pril_info).span()[0]
+                                pril_name = pril_info[:end_of_name]
+                                pril_dict = {'прил': pril_name}
+                                for element in pril_info[end_of_name + 1:].split(', '):
+                                    pril_dict[element.split('.')[0]] = element.split('.')[1].strip()
+                            elif elements == values[-1] and is_general_parsed == True:
+                                if len(values) > 1:
+                                    other = values[-1]
+                                    other_dict = {'інше': other}
+                            else:
+                                is_general_parsed = True
                                 for element in elements.split(', '):
                                     try:
                                         general_dict[element.split('.')[0]] = element.split('.')[1].strip()
                                     except IndexError:
                                         continue
-                            else:
-                                pril_info = elements.strip()[8:]
-                                end_of_name = re.search('\s[а-яі]{3}[.]{1}', pril_info).span()[0]
-                                pril_name = pril_info[:end_of_name]
-                                pril_dict = {'пріл': pril_name}
-                                for element in pril_info[end_of_name+1:].split(', '):
-                                    pril_dict[element.split('.')[0]] = element.split('.')[1].strip()
-                        time_dict[key_].append(list(filter(lambda a: a, [general_dict, pril_dict, other_dict])))
+                        general_dict.update(other_dict)
+                        if pril_dict == {}:
+                            time_dict[key_] = general_dict
+                        else:
+                            time_dict[key_] = [general_dict, pril_dict]
                         settlement[key].append(time_dict)
-                        pass
                     elif key_ == 'Дот.' or key_ == 'Дот. т.':
                         value = line_[1].replace('\n', ' ').split('; ')
+                        time_dict[key_] = {}
                         other_dict = None
-                        time_dict[key_] = []
                         if len(value) > 1:
                             other = value[-1]
                             other_dict = {'інше': other}
@@ -132,9 +136,9 @@ def parse_(file_):
                             for pattern in patterns:
                                 num_dict[pattern.split(' ')[1]] = pattern.split(' ')[0]
                             el_dict[dot_key] = num_dict
-                            time_dict[key_].append(el_dict)
+                            time_dict[key_].update(el_dict)
                         if other_dict:
-                            time_dict[key_].append(other_dict)
+                            time_dict[key_].update(other_dict)
                         settlement[key].append(time_dict)
                     #  всі решту стрічки
                     else:
