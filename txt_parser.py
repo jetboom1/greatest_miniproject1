@@ -54,6 +54,7 @@ def parse_(file_):
     # по кажному населеному пункті
     for line in file:
         settlement = dict()
+        stuff_dict = dict()
         # тепер проходимось кожному абзаці
         for part_of_line in line.split('\n\n'):
             if len(part_of_line) > 2:
@@ -68,9 +69,9 @@ def parse_(file_):
                 else:
                     line_ = part_of_line.split(":")
                     time_dict = {}
-                    key_ = line_[0]
+                    key_ = line_[0].lower()
                     # якщо ключ строчки є школа
-                    if key_ == 'Шк.':
+                    if key_ == 'шк.':
                         value_ = line_[1].replace('\n', ' ').split(';')
                         time_list = []
                         for school in value_:
@@ -78,10 +79,16 @@ def parse_(file_):
                             time_list.append(school)
                         time_dict[key_] = time_list
                         settlement[key].append(time_dict)
-                    elif key_ == 'Надає':
-                        time_dict[key_] = line_[1].replace('\n', ' ')
+                    elif key_ == 'надає':
+                        time_dict[key_] = dict()
+                        value_x = line_[1].replace('\n', ' ').lstrip()
+                        if ',' in value_x or '»' in value_x:
+                            time_dict[key_]['тип'] = 'організація'
+                        else:
+                            time_dict[key_]["тип"] = 'особа'
+                        time_dict[key_]['назва'] = value_x
                         settlement[key].append(time_dict)
-                    elif key_ == 'Душ':
+                    elif key_ == 'душ':
                         values = line_[1].replace('\n', ' ').split(';')
                         other = ''
                         general_dict = {}
@@ -113,7 +120,7 @@ def parse_(file_):
                         else:
                             time_dict[key_] = [general_dict, pril_dict]
                         settlement[key].append(time_dict)
-                    elif key_ == 'Дот.' or key_ == 'Дот. т.':
+                    elif key_ == 'дот.' or key_ == 'дот. т.':
                         value = line_[1].replace('\n', ' ').split('; ')
                         time_dict[key_] = {}
                         other_dict = None
@@ -147,23 +154,52 @@ def parse_(file_):
                             value = line_[1].replace('\n', ' ')
                         except IndexError:
                             continue
-                        items = value.split(',')
+                        items = value.lstrip(' ').split(',')
                         flag = True
+                        flag_2 = True
                         for item in items:
-                            if key_ == 'Парох' and flag:# and item.split('.')[0] == 'о':
-                                complex_dict["ім'я"] = item
-                                flag = False
-                            elif key_ == 'Стар.' and flag:
+                            if key_ == 'парох' and flag:  # and item.split('.')[0] == 'о':
+                                if "о." in item:
+                                    item_list = item.split(' ')
+                                    complex_dict['тип'] = item_list[0]
+                                    complex_dict["ім'я"] = item_list[1]
+                                    if len(item_list) == 3:
+                                        complex_dict['прізвище'] = item_list[2]
+                                    flag = False
+                            elif key_ == 'завідатель' and flag_2:
+                                if "о." in item:
+                                    item_list = item.split(' ')
+                                    complex_dict['тип'] = item_list[0]
+                                    complex_dict["ім'я"] = item_list[1]
+                                    if len(item_list) == 3:
+                                        complex_dict['прізвище'] = item_list[2]
+                                    flag_2 = False
+                            elif key_ == 'завідує':
+                                complex_dict['хз що тут має бути'] = item
+                            elif key_ == 'стар.' and flag:
                                 complex_dict['Стар.'] = item.split(' ')[0]
                                 complex_dict['відстань'] = ' '.join(item.split(' ')[1:])
                                 flag = False
                             else:
                                 try:
-                                    complex_dict[item.split('.')[0]] = item.split('.')[1]
+                                    if item.split('.')[0] == ' ж' or item.split('.')[0] == ' вд' or item.split('.')[
+                                        0] == ' бж':
+                                        complex_dict['стан'] = item.split('.')[0].lstrip()
+                                    else:
+                                        complex_dict[item.split('.')[0].lstrip()] = item.split('.')[1]
                                 except IndexError:
                                     complex_dict['0'] = item
-                        time_dict[key_] = complex_dict
-                        settlement[key].append(time_dict)
+                        if 'парох' == key_ or 'завідує' == key_ or 'завідатель' == key_:
+                            time_dict[key_] = complex_dict
+                            if 'персонал' not in stuff_dict.keys():
+                                stuff_dict['персонал'] = time_dict
+                                settlement[key].append(stuff_dict)
+                            else:
+                                stuff_dict['персонал'][key_] = time_dict[key_]
+                                settlement[key].append(stuff_dict)
+                        else:
+                            time_dict[key_] = complex_dict
+                            settlement[key].append(time_dict)
         # додаємо населений пункт в список
         lines.append(settlement)
     lines.pop(0)
@@ -171,9 +207,9 @@ def parse_(file_):
     return lines
 
 
-if __name__ == '__main__':
-    data = parse_(read_file('text/hodoriv.txt'))
+def functionality(data, path_to_json):
     new_main_dct = {}
+    result = []
     for main_dct in data:
         main_key = list(main_dct.keys())[0]
         inner = {}
@@ -181,5 +217,15 @@ if __name__ == '__main__':
             for key in dct:
                 inner[key] = dct[key]
         new_main_dct[main_key] = inner
-    with open("jsons/hodoriv.json", "w", encoding="utf-8") as file:
-        json.dump(new_main_dct, file, indent=4, ensure_ascii=False)
+        result.append(new_main_dct[main_key])
+    with open(path_to_json, "w", encoding="utf-8") as file:
+        json.dump(result, file, indent=4, ensure_ascii=False)
+
+
+if __name__ == '__main__':
+    data1 = parse_(read_file('text/stymilo-kamenets.txt'))
+    functionality(data1, "jsons/strymilo-kamenets.json")
+    data2 = parse_(read_file('text/hodoriv.txt'))
+    functionality(data2, 'jsons/hodoriv.json')
+    # data3 = parse_(read_file('text/zbarazh.txt'))
+    # functionality(data3, 'jsons/zbarazh.json')
