@@ -72,13 +72,33 @@ def parse_(file_):
                     key_ = line_[0].lower()
                     # якщо ключ строчки є школа
                     if key_ == 'шк.':
-                        value_ = line_[1].replace('\n', ' ').split(';')
-                        time_list = []
-                        for school in value_:
-                            school = school.split(', ')
-                            time_list.append(school)
-                        time_dict[key_] = time_list
-                        settlement[key].append(time_dict)
+                        values = line_[1].replace('\n', ' ').split(';')
+                        general_dict = {key_: []}
+                        for value in values:
+                            school_dict = {}
+                            is_other = True
+                            if re.search('-кл.', value):
+                                school_dict['клас'] = value[re.search('-кл.', value).start()-1]
+                                is_other = False
+                            if re.search('пол[.]|укр[.]', value):
+                                school_dict['мова'] = re.search('пол[.]|укр[.]', value).group()
+                                is_other = False
+                            if re.search('діт[.]', value):
+                                child_dict = {}
+                                nationalities = re.findall('грк[.]\s\d{1,3}|лат[.]\s\d{1,3}|жид[.]\s\d{1,3}|'
+                                                           'інш[.]\s\d{1,3}', value)
+                                for pair in nationalities:
+                                    type, quantity = pair.split(' ')
+                                    child_dict[type] = quantity
+                                school_dict['діти'] = child_dict
+                                is_other = False
+                            if re.search('жін[.]|муж[.]', value):
+                                school_dict['тип'] = re.search('жін[.]|муж[.]', value).group()
+                                is_other = False
+                            if is_other:
+                                school_dict['інше'] = value
+                            general_dict[key_].append(school_dict)
+                        settlement[key].append(general_dict)
                     elif key_ == 'надає':
                         time_dict[key_] = dict()
                         value_x = line_[1].replace('\n', ' ').lstrip()
@@ -91,7 +111,7 @@ def parse_(file_):
                     elif key_ == 'душ':
                         values = line_[1].replace('\n', ' ').split(';')
                         other = ''
-                        general_dict = {}
+                        school_dict = {}
                         other_dict = {}
                         is_general_parsed = False
                         pril_dict = {}
@@ -111,14 +131,14 @@ def parse_(file_):
                                 is_general_parsed = True
                                 for element in elements.split(', '):
                                     try:
-                                        general_dict[element.split('.')[0]] = element.split('.')[1].strip()
+                                        school_dict[element.split('.')[0]] = element.split('.')[1].strip()
                                     except IndexError:
                                         continue
-                        general_dict.update(other_dict)
+                        school_dict.update(other_dict)
                         if pril_dict == {}:
-                            time_dict[key_] = general_dict
+                            time_dict[key_] = school_dict
                         else:
-                            time_dict[key_] = [general_dict, pril_dict]
+                            time_dict[key_] = [school_dict, pril_dict]
                         settlement[key].append(time_dict)
                     elif key_ == 'дот.' or key_ == 'дот. т.':
                         value = line_[1].replace('\n', ' ').split('; ')
@@ -223,9 +243,9 @@ def functionality(data, path_to_json):
 
 
 if __name__ == '__main__':
-    data1 = parse_(read_file('text/stymilo-kamenets.txt'))
-    functionality(data1, "jsons/strymilo-kamenets.json")
-    data2 = parse_(read_file('text/hodoriv.txt'))
-    functionality(data2, 'jsons/hodoriv.json')
+    # data1 = parse_(read_file('text/stymilo-kamenets.txt'))
+    # functionality(data1, "jsons/strymilo-kamenets.json")
+    # data2 = parse_(read_file('text/hodoriv.txt'))
+    # functionality(data2, 'jsons/hodoriv.json')
     data3 = parse_(read_file('text/zbarazh.txt'))
     functionality(data3, 'jsons/zbarazh.json')
