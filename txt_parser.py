@@ -71,28 +71,32 @@ def parse_(file_):
                     time_dict = {}
                     key_ = line_[0].lower()
                     # якщо ключ строчки є школа
-                    if key_ == 'шк.':
+                    if key_ == 'шк.' or key_ == 'шк':
                         values = line_[1].replace('\n', ' ').split(';')
                         general_dict = {key_: []}
                         for value in values:
                             school_dict = {}
                             is_other = True
-                            if re.search('-кл.', value):
+                            if re.search('-кл[,.]', value):
                                 school_dict['клас'] = value[re.search('-кл.', value).start()-1]
                                 is_other = False
-                            if re.search('пол[.]|укр[.]', value):
-                                school_dict['мова'] = re.search('пол[.]|укр[.]', value).group()
+                            if re.search('пол[.,]|укр[.,]', value):
+                                school_dict['мова'] = re.search('пол[.,]|укр[.,]', value).group()
                                 is_other = False
-                            if re.search('діт[.]', value):
+                            if re.search('діт[.,]', value):
                                 child_dict = {}
-                                nationalities = re.findall('грк[.]\s\d{1,3}|лат[.]\s\d{1,3}|жид[.]\s\d{1,3}|'
-                                                           'інш[.]\s\d{1,3}', value)
+                                nationalities = re.findall('грк[.,]\s\d{1,3}|лат[.,]\s\d{1,3}|жид[.,]\s\d{1,3}|'
+                                                           'інш[.,]\s\d{1,3}', value)
                                 for pair in nationalities:
                                     type, quantity = pair.split(' ')
                                     child_dict[type] = quantity
-                                school_dict['діти'] = child_dict
+                                if child_dict:
+                                    school_dict['діти'] = child_dict
+                                else:
+                                    quantity = re.search('діт[.,]\s\d{1,3}', value).group().split(' ')[1]
+                                    school_dict['діти'] = quantity
                                 is_other = False
-                            if re.search('жін[.]|муж[.]', value):
+                            if re.search('жін[.,]|муж[.,]', value):
                                 school_dict['тип'] = re.search('жін[.]|муж[.]', value).group()
                                 is_other = False
                             if is_other:
@@ -243,9 +247,9 @@ def functionality(data, path_to_json):
 
 
 if __name__ == '__main__':
-    # data1 = parse_(read_file('text/stymilo-kamenets.txt'))
-    # functionality(data1, "jsons/strymilo-kamenets.json")
-    # data2 = parse_(read_file('text/hodoriv.txt'))
-    # functionality(data2, 'jsons/hodoriv.json')
+    data1 = parse_(read_file('text/stymilo-kamenets.txt'))
+    functionality(data1, "jsons/strymilo-kamenets.json")
+    data2 = parse_(read_file('text/hodoriv.txt'))
+    functionality(data2, 'jsons/hodoriv.json')
     data3 = parse_(read_file('text/zbarazh.txt'))
     functionality(data3, 'jsons/zbarazh.json')
