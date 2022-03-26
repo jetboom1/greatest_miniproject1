@@ -98,7 +98,7 @@ def parse_(file_):
                         for elements in values:
                             if elements.strip().startswith('в прил.'):
                                 pril_info = elements.strip()[8:]
-                                end_of_name = re.search('\s[а-яі]{3}[.]{1}', pril_info).span()[0]
+                                end_of_name = re.search('\s[а-яі]{3}[.:]{1}', pril_info).span()[0]
                                 pril_name = pril_info[:end_of_name]
                                 pril_dict = {'прил': pril_name}
                                 for element in pril_info[end_of_name + 1:].split(', '):
@@ -227,5 +227,5 @@ if __name__ == '__main__':
     functionality(data1, "jsons/strymilo-kamenets.json")
     data2 = parse_(read_file('text/hodoriv.txt'))
     functionality(data2, 'jsons/hodoriv.json')
-    # data3 = parse_(read_file('text/zbarazh.txt'))
-    # functionality(data3, 'jsons/zbarazh.json')
+    data3 = parse_(read_file('text/zbarazh.txt'))
+    functionality(data3, 'jsons/zbarazh.json')
