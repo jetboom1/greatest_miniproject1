@@ -24,7 +24,7 @@ Here we processed the data from <i>jpeg</i> into <i>json</i> files using tessera
 
 #### [Original files](data)
 
-#### [Result](1.txt)
+#### [Result](jsons)
 
 
 <h3> <p style="color:#c5f015">Done</p>
