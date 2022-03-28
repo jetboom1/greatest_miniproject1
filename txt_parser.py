@@ -199,7 +199,7 @@ def parse_(file_):
                                         complex_dict['прізвище'] = item_list[2]
                                     flag_2 = False
                             elif key_ == 'завідує':
-                                complex_dict['хз що тут має бути'] = item
+                                complex_dict['парох'] = item
                             elif key_ == 'стар.' and flag:
                                 complex_dict['Стар.'] = item.split(' ')[0]
                                 complex_dict['відстань'] = ' '.join(item.split(' ')[1:])
