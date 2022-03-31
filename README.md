@@ -1,5 +1,3 @@
-
-
 <h2> <p align="center">
 <b><i>Pianists</i></b>
 </p> </h2>
